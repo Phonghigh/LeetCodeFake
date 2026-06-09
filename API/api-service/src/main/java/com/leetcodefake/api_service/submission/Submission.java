@@ -51,6 +51,7 @@ public class Submission {
     private String sourceCode;
     
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Language language;
 
     private int runtime;
