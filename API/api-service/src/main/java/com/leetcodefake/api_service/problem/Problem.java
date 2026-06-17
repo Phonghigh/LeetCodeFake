@@ -12,6 +12,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.EnumType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,6 +25,7 @@ import com.leetcodefake.api_service.common.enums.Difficulty;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "problems")
+@Builder
 public class Problem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -61,4 +63,5 @@ public class Problem {
     void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+    
 }
