@@ -1,4 +1,13 @@
+jwt:
+  secret: ${JWT_SECRET:dev-secret-key-must-be-at-least-256-bits-long-1234}
+  expiration: 86400000
+  refresh-expiration: 604800
+
 spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/leetcode_fake}
     username: ${DB_USERNAME:postgres}
