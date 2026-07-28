@@ -1,5 +1,7 @@
 package com.leetcodefake.api_service.problem;
 
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.leetcodefake.api_service.problem.dto.ProblemResponse;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/problems")
+@RequestMapping("${api.contextPath}/problems")
 public class ProblemController {
 
     
@@ -34,7 +36,7 @@ public class ProblemController {
 
     @PostMapping
     public ProblemResponse createProblem(
-        @RequestBody CreateProblemRequest request
+      @Valid @RequestBody CreateProblemRequest request
     ) {
         return problemService.createProblem(
             request.title(),

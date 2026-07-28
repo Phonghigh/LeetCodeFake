@@ -3,6 +3,9 @@ package com.leetcodefake.api_service.problem;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.leetcodefake.api_service.user.User;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.leetcodefake.api_service.common.exception.ResourceNotFoundException;
@@ -31,21 +34,28 @@ public class ProblemService {
         return problems;
     }
 
+    @PreAuthorize("hasRole('ADMIN')") //only User has role Admin can use this service
     public ProblemResponse createProblem(
         String title,
         String description,
         String constraints,
         Difficulty difficulty
     ) {
+        //
+        User currentUser = (User) SecurityContextHolder.getContext()
+            .getAuthentication()
+            .getPrincipal();
         
         Problem problem = 
             Problem.builder()
-                .title(title)
-                .description(description)
-                .constraints(constraints)
-                .difficulty(difficulty)
-                .build();
-        
+                    .title(title)
+                    .description(description)
+                    .constraints(constraints)
+                    .difficulty(difficulty)
+                    .createdBy(currentUser.getEmail())
+                    .updatedBy(currentUser.getEmail())
+                    .build();
+
         problemRepository.save(problem);
         return ProblemResponse.from(problem);
     }

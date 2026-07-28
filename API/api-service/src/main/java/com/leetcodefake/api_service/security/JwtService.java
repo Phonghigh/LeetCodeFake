@@ -43,9 +43,9 @@ public class JwtService {
     }
 
     public String generateRefreshToken(String email) {
-        String token = UUID.randomUUID().toString();
-        redisTemplate.opsForValue().set("refresh:" + token, email, Duration.ofSeconds(refreshExpiration));
-        return token;
+        String refreshToken = UUID.randomUUID().toString();
+        redisTemplate.opsForValue().set("refresh:" + refreshToken, email, Duration.ofSeconds(refreshExpiration));
+        return refreshToken;
     }
 
     public String extractEmailFromRefreshToken(String refreshToken) {
@@ -69,7 +69,7 @@ public class JwtService {
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> resolver) {
-        return resolver.apply(Jwts.parserBuilder()
+            return resolver.apply(Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
                 .build()
                 .parseClaimsJws(token)

@@ -9,7 +9,7 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/leetcode_fake}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/leetcode_fake?options=-c%20TimeZone=UTC}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -18,10 +18,23 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
-    show-sql: true
+
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+
 
   flyway:
       # Enables or disables flyway migration execution on startup
       enabled: true
       # Locations of migration scripts (default is classpath:db/migration)
       locations: classpath:db/migration
+logging:
+  level:
+    org.springframework.security: TRACE
+    org.hibernate.SQL: DEBUG
+#    org.hibernate.orm.jdbc.bind: TRACE
+
+api:
+  contextPath: "api/v1"
