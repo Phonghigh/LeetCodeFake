@@ -1,6 +1,7 @@
 package com.leetcodefake.api_service.security;
 
 import com.leetcodefake.api_service.user.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -26,10 +27,12 @@ public class SecurityConfig {
 
     private final UserRepository userRepository;
     private final JwtAuthFilter jwtAuthFilter;
+    private final String apiContextPath;
 
-    public SecurityConfig(UserRepository userRepository, JwtAuthFilter jwtAuthFilter) {
+    public SecurityConfig(UserRepository userRepository, JwtAuthFilter jwtAuthFilter, @Value("${api.contextPath}") String apiContextPath) {
         this.userRepository = userRepository;
         this.jwtAuthFilter = jwtAuthFilter;
+        this.apiContextPath = apiContextPath;
     }
 
     @Bean
@@ -38,9 +41,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("auth/me").authenticated()
+                .requestMatchers("/auth/me").authenticated()
                 .requestMatchers("/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "${api.contextPath}/problems/**").permitAll()
+                .requestMatchers(HttpMethod.GET, apiContextPath + "/problems/**").permitAll()
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())
