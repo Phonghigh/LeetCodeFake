@@ -2,6 +2,7 @@ package com.leetcodefake.api_service.common.enums;
 
 public enum SubmissionStatus {
     PENDING  ,
+    PROCESSING  ,
     ACCEPTED,
     WRONG_ANSWER,
     TIME_LIMIT_EXCEEDED,

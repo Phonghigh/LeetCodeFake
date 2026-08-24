@@ -3,6 +3,7 @@ package com.leetcodefake.api_service.submission;
 import com.leetcodefake.api_service.problem.Problem;
 import com.leetcodefake.api_service.submission.dto.SubmissionRequestDTO;
 import com.leetcodefake.api_service.submission.dto.SubmissionResponseDTO;
+import com.leetcodefake.api_service.submission.dto.SubmitProblemRequest;
 import com.leetcodefake.api_service.user.User;
 
 public class SubmissionMapper {
@@ -25,6 +26,8 @@ public class SubmissionMapper {
         submission.setLanguage(requestDTO.getLanguage());
         submission.setProblem(problem);
         submission.setUser(user);
+        submission.setCreatedBy(user.getUsername());
+        submission.setUpdatedBy(user.getUsername());
         return submission;
     }
 }

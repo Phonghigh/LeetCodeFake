@@ -1,5 +1,11 @@
 package com.leetcodefake.api_service.problem;
 
+import com.leetcodefake.api_service.submission.Submission;
+import com.leetcodefake.api_service.submission.SubmissionMapper;
+import com.leetcodefake.api_service.submission.SubmissionService;
+import com.leetcodefake.api_service.submission.dto.SubmissionRequestDTO;
+import com.leetcodefake.api_service.submission.dto.SubmissionResponseDTO;
+import com.leetcodefake.api_service.submission.dto.SubmitProblemRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,8 +25,10 @@ public class ProblemController {
 
     
     private final ProblemService problemService;
-    public ProblemController(ProblemService problemService) {
+    private final SubmissionService submissionService;
+    public ProblemController(ProblemService problemService, SubmissionService submissionService) {
         this.problemService = problemService;
+        this.submissionService = submissionService;
     }
 
     @GetMapping("/{id}")
@@ -44,6 +52,13 @@ public class ProblemController {
             request.difficulty()
         );
     }
-    
-    
+
+    @PostMapping("/{problemId}/submit")
+    public SubmissionResponseDTO submitProblem(
+        @PathVariable Long problemId,
+        @Valid @RequestBody SubmissionRequestDTO request
+    ) {
+        Submission submission = submissionService.submit(problemId, request);
+        return SubmissionMapper.toDTO(submission);
+    }
 }

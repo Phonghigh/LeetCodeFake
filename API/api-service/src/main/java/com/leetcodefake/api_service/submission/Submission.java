@@ -1,5 +1,7 @@
 package com.leetcodefake.api_service.submission;
 
+import com.leetcodefake.api_service.common.enums.AggregateType;
+import com.leetcodefake.api_service.outboxEvent.OutboxAggregate;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Table;
@@ -34,7 +36,7 @@ import com.leetcodefake.api_service.common.enums.SubmissionStatus;
 @Setter
 @Getter
 @Table(name = "submissions")
-public class Submission {
+public class Submission implements OutboxAggregate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
@@ -78,5 +80,15 @@ public class Submission {
     @PreUpdate
     void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    @Override
+    public String getAggregateType() {
+        return AggregateType.SUBMISSION.name();
+    }
+
+    @Override
+    public long getAggregateId() {
+        return this.getId().intValue();
     }
 }
