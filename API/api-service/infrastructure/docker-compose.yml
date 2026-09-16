@@ -1,5 +1,6 @@
 services:
     postgres:
+        profiles: [legacy-db]
         image: postgres:17
         environment:
             POSTGRES_DB: ${DB_NAME:-leetcode_fake}
