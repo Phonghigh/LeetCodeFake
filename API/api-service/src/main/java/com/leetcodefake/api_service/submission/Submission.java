@@ -29,7 +29,9 @@ import java.time.LocalDateTime;
 
 import com.leetcodefake.api_service.common.enums.Language;
 import com.leetcodefake.api_service.common.enums.SubmissionStatus;
+import lombok.experimental.Accessors;
 
+@Accessors(chain = true)
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -56,7 +58,7 @@ public class Submission implements OutboxAggregate {
     @Enumerated(EnumType.STRING)
     private Language language;
 
-    private int runtime;
+    private long runtime;
     private int memory;
 
     @Enumerated(EnumType.STRING)

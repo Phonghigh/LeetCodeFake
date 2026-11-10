@@ -8,7 +8,6 @@ import com.leetcodefake.api_service.outboxEvent.OutboxEventRepository;
 import com.leetcodefake.api_service.problem.Problem;
 import com.leetcodefake.api_service.problem.ProblemRepository;
 import com.leetcodefake.api_service.submission.dto.SubmissionRequestDTO;
-import com.leetcodefake.api_service.submission.dto.SubmitProblemRequest;
 import com.leetcodefake.api_service.user.User;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;

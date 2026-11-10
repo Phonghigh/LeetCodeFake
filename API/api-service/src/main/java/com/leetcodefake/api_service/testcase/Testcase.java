@@ -11,10 +11,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import com.leetcodefake.api_service.problem.Problem;
 import java.time.LocalDateTime;
@@ -25,6 +22,7 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @Table(name = "test_cases")
+@Builder
 public class Testcase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -40,8 +38,8 @@ public class Testcase {
     @Column(columnDefinition = "TEXT", name = "expected_output")
     private String expectedOutput;
 
-    @Column(nullable = false, name = "is_hidden")
-    private Boolean isHidden;
+    @Column(nullable = false, name = "hidden")
+    private Boolean hidden;
 
     @Column(nullable = false, name = "created_by")
     private String createdBy;

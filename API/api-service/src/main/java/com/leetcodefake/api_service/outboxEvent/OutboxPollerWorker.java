@@ -8,11 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class OutboxPollerService {
+public class OutboxPollerWorker {
     private final RedisQueueService redisQueueService;
     private final OutboxTransactionService outboxTransactionService;
 
-    public OutboxPollerService(OutboxTransactionService outboxTransactionService, RedisQueueService redisQueueService) {
+    public OutboxPollerWorker(OutboxTransactionService outboxTransactionService, RedisQueueService redisQueueService) {
         this.outboxTransactionService = outboxTransactionService;
         this.redisQueueService = redisQueueService;
     }

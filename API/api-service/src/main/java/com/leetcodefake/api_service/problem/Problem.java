@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import com.leetcodefake.api_service.common.enums.Difficulty;
+import lombok.experimental.Accessors;
 
 @Entity
 @Setter
@@ -26,6 +27,7 @@ import com.leetcodefake.api_service.common.enums.Difficulty;
 @AllArgsConstructor
 @Table(name = "problems")
 @Builder
+@Accessors(chain = true)
 public class Problem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
@@ -41,8 +43,11 @@ public class Problem {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private String constraints;
+    @Column(nullable = false, name = "limit_time_ms")
+    private long timeLimit;
+
+    @Column(nullable = false, name = "limit_memory_bytes")
+    private int memoryLimit;
 
     @Column(nullable = false, name = "created_by")
     private String createdBy;

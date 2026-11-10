@@ -3,6 +3,7 @@ package com.leetcodefake.api_service.problem;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.leetcodefake.api_service.problem.dto.ProblemRequestDTO;
 import com.leetcodefake.api_service.user.User;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.leetcodefake.api_service.common.exception.ResourceNotFoundException;
 import com.leetcodefake.api_service.common.enums.Difficulty;
-import com.leetcodefake.api_service.problem.dto.ProblemResponse;
+import com.leetcodefake.api_service.problem.dto.ProblemResponseDTO;
 
 @Service
 public class ProblemService {
@@ -20,43 +21,54 @@ public class ProblemService {
         this.problemRepository = problemRepository;
     }
 
-    public ProblemResponse findById(Long id) {
+    public ProblemResponseDTO findById(Long id) {
         Problem problem = problemRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Problem not found"));
-        return ProblemResponse.from(problem);
+        return ProblemMapper.toDTO(problem);
     }
 
-    public List<ProblemResponse> getProblems() {
-        List<ProblemResponse> problems =  problemRepository.findAll().stream()
-            .map(ProblemResponse::from)
+    public List<ProblemResponseDTO> getProblems() {
+        List<ProblemResponseDTO> problems =  problemRepository.findAll().stream()
+            .map(ProblemMapper::toDTO)
             .collect(Collectors.toList());
         
         return problems;
     }
 
     @PreAuthorize("hasRole('ADMIN')") //only User has role Admin can use this service
-    public ProblemResponse createProblem(
-        String title,
-        String description,
-        String constraints,
-        Difficulty difficulty
+    public ProblemResponseDTO createProblem(
+        ProblemRequestDTO requestDTO
     ) {
         //
         User currentUser = (User) SecurityContextHolder.getContext()
             .getAuthentication()
             .getPrincipal();
         
-        Problem problem = 
-            Problem.builder()
-                    .title(title)
-                    .description(description)
-                    .constraints(constraints)
-                    .difficulty(difficulty)
-                    .createdBy(currentUser.getEmail())
-                    .updatedBy(currentUser.getEmail())
-                    .build();
-
+        Problem problem = ProblemMapper.toEntity(requestDTO, currentUser);
         problemRepository.save(problem);
-        return ProblemResponse.from(problem);
+        return ProblemMapper.toDTO(problem);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')") //only User has role Admin can use this service
+    public ProblemResponseDTO updateProblem(
+        long problemId,
+        ProblemRequestDTO requestDTO
+    ) {
+        Problem problem = problemRepository.findById(problemId)
+            .orElseThrow(() -> new ResourceNotFoundException("Problem not found"));
+        problem.setTitle(requestDTO.getTitle())
+            .setDifficulty(requestDTO.getDifficulty())
+            .setDescription(requestDTO.getDescription())
+            .setTimeLimit(requestDTO.getTimeLimit())
+            .setMemoryLimit(requestDTO.getMemoryLimit());
+        problemRepository.save(problem);
+        return ProblemMapper.toDTO(problem);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')") //only User has role Admin can use this service
+    public void deleteProblem(Long id) {
+        Problem problem = problemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Problem not found"));
+        problemRepository.delete(problem);
     }
 }

@@ -1,5 +1,6 @@
 package com.leetcodefake.api_service.judge;
 
+import com.leetcodefake.api_service.common.enums.Language;
 import com.leetcodefake.api_service.common.enums.SubmissionStatus;
 import com.leetcodefake.api_service.problem.Problem;
 import com.leetcodefake.api_service.problem.ProblemRepository;
@@ -7,19 +8,23 @@ import com.leetcodefake.api_service.submission.Submission;
 import com.leetcodefake.api_service.submission.SubmissionRepository;
 import com.leetcodefake.api_service.testcase.Testcase;
 import com.leetcodefake.api_service.testcase.TestcaseRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class JudgeService {
-    private final JudgeWorker judgeWorker;
     private final SubmissionRepository submissionRepository;
     private final TestcaseRepository testcaseRepository;
+    private final SandboxRunner sandboxRunner;
+    private final ProblemRepository problemRepository;
 
-    public JudgeService(JudgeWorker judgeWorker, SubmissionRepository submissionRepository, TestcaseRepository testcaseRepository) {
-        this.judgeWorker = judgeWorker;
+    public JudgeService(SubmissionRepository submissionRepository, TestcaseRepository testcaseRepository, SandboxRunner sandboxRunner, ProblemRepository problemRepository) {
         this.submissionRepository = submissionRepository;
         this.testcaseRepository = testcaseRepository;
+        this.sandboxRunner = sandboxRunner;
+        this.problemRepository = problemRepository;
     }
 
     public SubmissionStatus judge(long SubmissionId) {
@@ -29,51 +34,44 @@ public class JudgeService {
         }
 
         String code = submission.get().getSourceCode();
-        String language = submission.get().getLanguage().name();
+        Language language = submission.get().getLanguage();
 
         // Validate the input parameters
         if (code == null || code.isEmpty()) {
             throw new IllegalArgumentException("Code cannot be null or empty");
         }
-        if (language == null || language.isEmpty()) {
+        if (language == null) {
             throw new IllegalArgumentException("Language cannot be null or empty");
         }
 
-        // Compile the code and check for compilation errors
-//        boolean isCompile = SanboxRunner.compile(code, language);
-//        if (!isCompile) {
-//            return SubmissionStatus.COMPILE_ERROR;
-//        }
-
-        // Get the test cases for the problem
-        Problem problem = submission.get().getProblem();
-        Optional<List<Testcase>> testcases = testcaseRepository.findByProblemId(problem.getId());
-        if (!testcases.isPresent()) {
-            throw new IllegalArgumentException("Test cases not found for the problem");
+        Optional<Problem> problem = problemRepository.findById(submission.get().getProblem().getId());
+        if (!problem.isPresent()) {
+            throw new IllegalArgumentException("Problem not found");
         }
 
-        List<Testcase> testcaseList = testcases.get();
-        // Run the code with each test case and collect the results
-        for (Testcase testcase : testcaseList) {
-
-//            ExcecutionResult result = SanboxRunner.run(code, language, testcase.getInput());
-//
-//
-//            String expectedOutput = testcase.getExpectedOutput();
-//            String actualOutput = result.output();
-//
-//            try {
-//                if (!compareOutput(actualOutput, expectedOutput)) {
-//                    return SubmissionStatus.WRONG_ANSWER;
-//                }
-//            }
-//            catch (Exception e) {
-//                throw new RuntimeException("Error occurred while comparing outputs", e);
-//            }
+        Optional<List<Testcase>> testCases = testcaseRepository.findInputsByProblemId(submission.get().getProblem().getId());
+        if (!testCases.isPresent()) {
+            throw new IllegalArgumentException("Test cases not found");
         }
-        submission.get().setStatus(SubmissionStatus.ACCEPTED);
+
+        //Get time limit and memory limit from problem
+        long timeLimitMs = problem.get().getTimeLimit();
+        if  (timeLimitMs <= 0) {
+            throw new IllegalArgumentException("Time limit must be greater than 0");
+        }
+        int memoryLimitBytes = problem.get().getMemoryLimit();
+        if  (memoryLimitBytes <= 0) {
+            throw new IllegalArgumentException("Memory limit must be greater than 0");
+        }
+
+        JudgeResult result = sandboxRunner.executionSubmission(testCases.get(), code, language, timeLimitMs, memoryLimitBytes);
+
+        submission.get()
+                .setStatus(result.submissionStatus())
+                .setRuntime(result.runtime())
+                .setMemory(result.memory());
         submissionRepository.save(submission.get());
-        return SubmissionStatus.ACCEPTED;
+        return result.submissionStatus();
     }
 
     private String normalizeOutput(String output) {

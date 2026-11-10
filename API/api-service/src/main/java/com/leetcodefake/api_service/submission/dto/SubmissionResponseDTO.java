@@ -13,7 +13,7 @@ public class SubmissionResponseDTO {
     private Long id;
     private String sourceCode;
     private Language language;
-    private int runtime;
+    private long runtime;
     private int memory;
     private SubmissionStatus submissionStatus;
     private String createdBy;

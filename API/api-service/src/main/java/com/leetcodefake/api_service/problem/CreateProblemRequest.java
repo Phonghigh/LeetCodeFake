@@ -7,7 +7,8 @@ import jakarta.validation.constraints.NotNull;
 public record CreateProblemRequest(
     @NotBlank String title,
     @NotBlank String description,
-    String constraints, // Optional field
+    @NotNull long timeLimit,
+    @NotNull int memoryLimit,
     @NotNull Difficulty difficulty
 ) {
 }
