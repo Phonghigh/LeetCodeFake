@@ -24,7 +24,7 @@ public class OutboxPollerWorker {
 
         // Push the events to the Redis queue
         events.forEach(event -> {
-            redisQueueService.enqueue("outboxEventQueue", event);
+            redisQueueService.enqueue("outboxEventQueue", event.getAggregateId());
         });
 
         // Mark the events as done in the outbox table

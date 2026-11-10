@@ -52,4 +52,11 @@ public class SubmissionService {
         outboxEventRepository.save(new OutboxEvent(submission));
         return submission;
     }
+
+    @Transactional
+    public Submission updateStatus(long id, SubmissionStatus status) {
+        Submission submission = findById(id);
+        submission.setStatus(status);
+        return submissionRepository.save(submission);
+    }
 }

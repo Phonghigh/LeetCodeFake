@@ -1,0 +1,2 @@
+ALTER TABLE outbox_events
+    ADD COLUMN updated_at TIMESTAMP NOT NULL DEFAULT NOW();
