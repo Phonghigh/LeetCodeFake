@@ -1,7 +1,9 @@
-package com.leetcodefake.api_service.judge;
+package com.leetcodefake.api_service.judge.application;
 
 import com.leetcodefake.api_service.common.enums.Language;
 import com.leetcodefake.api_service.common.enums.SubmissionStatus;
+import com.leetcodefake.api_service.judge.execution.SandboxRunner;
+import com.leetcodefake.api_service.judge.result.JudgeResult;
 import com.leetcodefake.api_service.problem.Problem;
 import com.leetcodefake.api_service.problem.ProblemRepository;
 import com.leetcodefake.api_service.submission.Submission;
@@ -72,33 +74,5 @@ public class JudgeService {
                 .setMemory(result.memory());
         submissionRepository.save(submission.get());
         return result.submissionStatus();
-    }
-
-    private String normalizeOutput(String output) {
-        // CRLF -> LF
-        output = output.replace("\r\n", "\n");
-        // CR -> LF
-        output = output.replace("\r", "\n");
-        // Remove trailing whitespace
-        output = output.replaceFirst("\\s+$", "");
-
-        return output;
-    }
-
-    private boolean compareOutput(String actualOutput, String expectedOutput) {
-
-        //validate the input parameters
-        if (actualOutput == null) {
-            throw new IllegalArgumentException("Output cannot be null");
-        }
-        if (expectedOutput == null) {
-            throw new IllegalArgumentException("Expected output cannot be null");
-        }
-        // Normalize the outputs
-        String normalizedActualOutput = normalizeOutput(actualOutput);
-        String normalizedExpectedOutput = normalizeOutput(expectedOutput);
-
-        // Compare the normalized outputs
-        return normalizedActualOutput.equals(normalizedExpectedOutput);
     }
 }

@@ -9,9 +9,9 @@ Build phases follow `docs/backend-plan.md`.
 - [x] **Phase 0 — Setup & Tooling** — Spring Boot project, Maven starters, docker-compose (Postgres + Redis)
 - [x] **Phase 1 — Database Layer (JPA + Flyway)** — entities, repositories, Flyway migrations, `ddl-auto: validate`
 - [x] **Phase 2 — REST API Layer (CRUD)** — `ProblemController` CRUD, DTO records, `GlobalExceptionHandler` (partial)
-- [~] **Phase 3 — Auth (Spring Security + JWT)** — register/login/me, `JwtAuthFilter`, `SecurityConfig`, `User implements UserDetails`, Redis refresh tokens *(done)*; **open:** `@PreAuthorize` admin check, validation/conflict exception handling, jjwt 0.12 API migration
-- [ ] **Phase 4 — Submission API + Redis Producer**
-- [ ] **Phase 5 — Judge Worker + Docker Sandbox**
+- [x] **Phase 3 — Auth (Spring Security + JWT)** — register/login/me, `JwtAuthFilter`, `SecurityConfig`, `User implements UserDetails`, Redis refresh tokens *(done)*; **open:** `@PreAuthorize` admin check, validation/conflict exception handling, jjwt 0.12 API migration
+- [x] **Phase 4 — Submission API + Redis Producer**
+- [x] **Phase 5 — Judge Worker + Docker Sandbox**
 - [ ] **Phase 6 — WebSocket Real-time**
 
 ## Open threads in the current phase (Phase 3)

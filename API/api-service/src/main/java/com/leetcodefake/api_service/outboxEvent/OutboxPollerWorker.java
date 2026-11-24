@@ -1,13 +1,14 @@
 package com.leetcodefake.api_service.outboxEvent;
 
 import com.leetcodefake.api_service.redisService.RedisQueueService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
+@Slf4j
 public class OutboxPollerWorker {
     private final RedisQueueService redisQueueService;
     private final OutboxTransactionService outboxTransactionService;
@@ -25,6 +26,7 @@ public class OutboxPollerWorker {
         // Push the events to the Redis queue
         events.forEach(event -> {
             redisQueueService.enqueue("outboxEventQueue", event.getAggregateId());
+            log.info("Pushed event to Redis queue: {}", event.getAggregateId());
         });
 
         // Mark the events as done in the outbox table

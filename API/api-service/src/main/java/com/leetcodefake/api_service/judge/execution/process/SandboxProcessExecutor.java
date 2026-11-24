@@ -1,12 +1,16 @@
-package com.leetcodefake.api_service.judge;
+package com.leetcodefake.api_service.judge.execution.process;
 
 import com.leetcodefake.api_service.common.enums.RunResult;
 import com.leetcodefake.api_service.common.exception.SandboxExecutionException;
+import com.leetcodefake.api_service.judge.result.CompileResult;
+import com.leetcodefake.api_service.judge.result.ExecutionResult;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -42,6 +46,21 @@ public class SandboxProcessExecutor {
         });
         reader.start();
         return new ReaderOutput(reader, outputStream, memoryLimitExceeded, readError);
+    }
+
+    private WriterOutput processWriter(Process process, String input) {
+        final AtomicReference<IOException> writeError = new AtomicReference<>();
+
+        Thread writer = new Thread(() -> {
+            try (OutputStream os = process.getOutputStream()) {
+                os.write(input.getBytes(StandardCharsets.UTF_8));
+                os.flush();
+            } catch (IOException e) {
+                writeError.set(e);
+            }
+        });
+        writer.start();
+        return new WriterOutput(writer, writeError);
     }
 
     public CompileResult compile(ProcessBuilder compiler, Path workingDirPath, int memoryLimitBytes, long timeLimitMs) {
@@ -83,13 +102,14 @@ public class SandboxProcessExecutor {
         }
     }
 
-    public ExecutionResult execute(ProcessBuilder runner, Path workingDirPath, long timeLimitMs, int memoryLimitBytes) {
+    public ExecutionResult execute(ProcessBuilder runner, Path workingDirPath, long timeLimitMs, int memoryLimitBytes, String input) {
         try {
             runner.directory(workingDirPath.toFile());
             runner.redirectErrorStream(true);
             long startTime = System.currentTimeMillis();
             Process process = runner.start();
             ReaderOutput readerOutput = this.processOutput(process, memoryLimitBytes, timeLimitMs);
+            WriterOutput writerOutput = this.processWriter(process, input);
             boolean finished = process.waitFor(timeLimitMs , TimeUnit.MILLISECONDS);
             long duration = System.currentTimeMillis() - startTime;
             if (!finished) {
@@ -103,6 +123,7 @@ public class SandboxProcessExecutor {
                         RunResult.TIME_LIMIT_EXCEEDED
                 );
             }
+            writerOutput.writer().join();
             readerOutput.reader().join();
             if (readerOutput.memoryLimitExceeded().get()) {
                 return new ExecutionResult(
@@ -116,6 +137,9 @@ public class SandboxProcessExecutor {
             }
             if (readerOutput.readError().get() != null) {
                 throw new RuntimeException(readerOutput.readError().get());
+            }
+            if (writerOutput.readError().get() != null) {
+                throw new RuntimeException(writerOutput.readError().get());
             }
 
             String output = readerOutput.outputStream().toString();

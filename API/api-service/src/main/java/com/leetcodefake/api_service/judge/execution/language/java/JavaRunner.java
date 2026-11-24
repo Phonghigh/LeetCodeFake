@@ -1,18 +1,16 @@
-package com.leetcodefake.api_service.judge;
+package com.leetcodefake.api_service.judge.execution.language.java;
 
-import com.leetcodefake.api_service.common.enums.RunResult;
-import com.leetcodefake.api_service.common.exception.SandboxExecutionException;
+import com.leetcodefake.api_service.judge.execution.language.LanguageRunner;
+import com.leetcodefake.api_service.judge.execution.process.SandboxProcessExecutor;
+import com.leetcodefake.api_service.judge.result.CompileResult;
+import com.leetcodefake.api_service.judge.result.ExecutionResult;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
-public class JavaRunner implements LanguageRunner{
+public class JavaRunner implements LanguageRunner {
     private final long timeLimitMs;
     private final int memoryLimitBytes;
     private final SandboxProcessExecutor executor;
@@ -32,9 +30,9 @@ public class JavaRunner implements LanguageRunner{
     }
 
     @Override
-    public ExecutionResult run(String input, String expectedOutput, Path workingDirPath) {
+    public ExecutionResult run(String input, Path workingDirPath) {
         ProcessBuilder runner = new ProcessBuilder("java", "Main");
-        return executor.execute(runner,  workingDirPath, timeLimitMs, memoryLimitBytes);
+        return executor.execute(runner,  workingDirPath, timeLimitMs, memoryLimitBytes, input);
     }
 
     @Override

@@ -1,8 +1,14 @@
-package com.leetcodefake.api_service.judge;
+package com.leetcodefake.api_service.judge.execution;
 
 import com.leetcodefake.api_service.common.enums.Language;
 import com.leetcodefake.api_service.common.enums.SubmissionStatus;
 import com.leetcodefake.api_service.common.exception.SandboxExecutionException;
+import com.leetcodefake.api_service.judge.execution.language.LanguageRunner;
+import com.leetcodefake.api_service.judge.execution.language.LanguageRunnerFactory;
+import com.leetcodefake.api_service.judge.execution.process.WorkingDir;
+import com.leetcodefake.api_service.judge.result.CompileResult;
+import com.leetcodefake.api_service.judge.result.ExecutionResult;
+import com.leetcodefake.api_service.judge.result.JudgeResult;
 import com.leetcodefake.api_service.testcase.Testcase;
 import org.springframework.stereotype.Service;
 
@@ -31,13 +37,21 @@ public class SandboxRunner {
 
             runner.prepareResources(code, workingDir.getPath());
 
-            runner.compile(workingDirPath);
+            CompileResult compileResult = runner.compile(workingDirPath);
+            if (compileResult.exitcode() != 0) {
+                JudgeResult judgeResult = new JudgeResult(
+                        false,
+                        compileResult.exitcode(),
+                        0,
+                        0,
+                        SubmissionStatus.COMPILE_ERROR);
+                return judgeResult;
+            }
 
             for (Testcase testcase : testcases) {
 
                 ExecutionResult result = runner.run(
                         testcase.getInput(),
-                        testcase.getExpectedOutput(),
                         workingDirPath);
                 timeExcecutionTestcase = max(timeExcecutionTestcase, result.durationMs());
                 memoryUsage = max(memoryUsage, result.memoryBytes());
@@ -65,6 +79,18 @@ public class SandboxRunner {
                             submissionStatus);
                     return judgeResult;
                 }
+
+                // Compare Output
+                if (!compareOutput(result.output(), testcase.getExpectedOutput())){
+                    JudgeResult judgeResult = new JudgeResult(
+                            false,
+                            0,
+                            timeExcecutionTestcase,
+                            memoryUsage,
+                            SubmissionStatus.WRONG_ANSWER
+                    );
+                    return judgeResult;
+                }
             }
         } catch (IOException e) {
             throw new SandboxExecutionException("Error occurred while preparing resources", e);
@@ -79,5 +105,33 @@ public class SandboxRunner {
                 memoryUsage,
                 SubmissionStatus.ACCEPTED);
         return judgeResult;
+    }
+
+    private String normalizeOutput(String output) {
+        // CRLF -> LF
+        output = output.replace("\r\n", "\n");
+        // CR -> LF
+        output = output.replace("\r", "\n");
+        // Remove trailing whitespace
+        output = output.replaceFirst("\\s+$", "");
+
+        return output;
+    }
+
+    private boolean compareOutput(String actualOutput, String expectedOutput) {
+
+        //validate the input parameters
+        if (actualOutput == null) {
+            throw new IllegalArgumentException("Output cannot be null");
+        }
+        if (expectedOutput == null) {
+            throw new IllegalArgumentException("Expected output cannot be null");
+        }
+        // Normalize the outputs
+        String normalizedActualOutput = normalizeOutput(actualOutput);
+        String normalizedExpectedOutput = normalizeOutput(expectedOutput);
+
+        // Compare the normalized outputs
+        return normalizedActualOutput.equals(normalizedExpectedOutput);
     }
 }

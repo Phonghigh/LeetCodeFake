@@ -1,9 +1,7 @@
-package com.leetcodefake.api_service.judge;
+package com.leetcodefake.api_service.judge.application;
 
 import com.leetcodefake.api_service.common.enums.SubmissionStatus;
-import com.leetcodefake.api_service.outboxEvent.OutboxEvent;
 import com.leetcodefake.api_service.redisService.RedisQueueService;
-import com.leetcodefake.api_service.submission.SubmissionRepository;
 import com.leetcodefake.api_service.submission.SubmissionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,6 +25,7 @@ public class JudgeWorker {
         Object value;
         while ((value = redisQueueService.dequeue("outboxEventQueue")) != null) {
             Long submissionId = ((Number) value).longValue();
+            log.info("Processing event with submissionId {}", submissionId);
             try {
                 judgeService.judge(submissionId);
             } catch (Exception e) {

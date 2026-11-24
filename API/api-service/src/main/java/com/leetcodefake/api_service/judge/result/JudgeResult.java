@@ -1,4 +1,4 @@
-package com.leetcodefake.api_service.judge;
+package com.leetcodefake.api_service.judge.result;
 
 import com.leetcodefake.api_service.common.enums.SubmissionStatus;
 
